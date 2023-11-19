@@ -2,18 +2,11 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements, goals: { GoalNear } } = require('mineflayer-pathfinder')
 const autoeat = require('mineflayer-auto-eat')
 
-const RANGE_GOAL = 2 // get within this radius of the player
-
-const botArgs = {
-    host: 'localhost',
-    //port: '12345',
-    username: "Vanity_bot",
-    version: '1.20.1',
-    auth: 'microsoft',
-};
 
 
 function initBot () {
+ // get within this radius of the player
+  const RANGE_GOAL = 2
 
   function attackPlayer (username) {
     const player = bot.players[username]
@@ -273,6 +266,13 @@ function initBot () {
     bot.on('error', console.log)
 };
 
-initBot();
+const botArgs = {
+  host: 'localhost',
+  //port: '12345',
+  username: "Vanity_bot",
+  version: '1.20.1',
+  auth: 'microsoft',
+};
 
+initBot(botArgs);
 
