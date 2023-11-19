@@ -12,133 +12,132 @@ const botArgs = {
     auth: 'microsoft',
 };
 
-function attackPlayer (username) {
-  const player = bot.players[username]
-  if (!player || !player.entity) {
-    bot.chat('I can\'t see you')
-  } else {
-    bot.chat(`Attacking ${player.username}`)
-    bot.attack(player.entity)
-  }
-}
 
-function attackEntity () {
-  const entity = bot.nearestEntity()
-  if (!entity) {
-    bot.chat('No nearby entities')
-  } else {
-    bot.chat(`Attacking ${entity.name ?? entity.username}`)
-    bot.attack(entity)
-  }
-}
+function initBot () {
 
-
-function sayItems (items = null) {
-  if (!items) {
-    items = bot.inventory.items()
-    if (bot.registry.isNewerOrEqualTo('1.9') && bot.inventory.slots[45]) items.push(bot.inventory.slots[45])
-  }
-  const output = items.map(itemToString).join(', ')
-  if (output) {
-    bot.chat(output)
-  } else {
-    bot.chat('I have no items.')
-  }
-}
-
-async function tossItem (name, amount) {
-  amount = parseInt(amount, 10)
-  const item = itemByName(name)
-  if (!item) {
-    bot.chat(`I have no ${name}`)
-  } else {
-    try {
-      if (amount) {
-        await bot.toss(item.type, null, amount)
-        bot.chat(`tossed ${amount} x ${name}`)
-      } else {
-        await bot.tossStack(item)
-        bot.chat(`tossed ${name}`)
-      }
-    } catch (err) {
-      bot.chat(`unable to toss: ${err.message}`)
+  function attackPlayer (username) {
+    const player = bot.players[username]
+    if (!player || !player.entity) {
+      bot.chat('I can\'t see you')
+    } else {
+      bot.chat(`Attacking ${player.username}`)
+      bot.attack(player.entity)
     }
   }
-}
 
-async function equipItem (name, destination) {
-  const item = itemByName(name)
-  if (item) {
-    try {
-      await bot.equip(item, destination)
-      bot.chat(`equipped ${name}`)
-    } catch (err) {
-      bot.chat(`cannot equip ${name}: ${err.message}`)
+  function attackEntity () {
+    const entity = bot.nearestEntity()
+    if (!entity) {
+      bot.chat('No nearby entities')
+    } else {
+      bot.chat(`Attacking ${entity.name ?? entity.username}`)
+      bot.attack(entity)
     }
-  } else {
-    bot.chat(`I have no ${name}`)
   }
-}
 
-async function unequipItem (destination) {
-  try {
-    await bot.unequip(destination)
-    bot.chat('unequipped')
-  } catch (err) {
-    bot.chat(`cannot unequip: ${err.message}`)
+
+  function sayItems (items = null) {
+    if (!items) {
+      items = bot.inventory.items()
+      if (bot.registry.isNewerOrEqualTo('1.9') && bot.inventory.slots[45]) items.push(bot.inventory.slots[45])
+    }
+    const output = items.map(itemToString).join(', ')
+    if (output) {
+      bot.chat(output)
+    } else {
+      bot.chat('I have no items.')
+    }
   }
-}
 
-function useEquippedItem () {
-  bot.chat('activating item')
-  bot.activateItem()
-}
-
-async function craftItem (name, amount) {
-  amount = parseInt(amount, 10)
-  const item = bot.registry.itemsByName[name]
-  const craftingTableID = bot.registry.blocksByName.crafting_table.id
-
-  const craftingTable = bot.findBlock({
-    matching: craftingTableID
-  })
-
-  if (item) {
-    const recipe = bot.recipesFor(item.id, null, 1, craftingTable)[0]
-    if (recipe) {
-      bot.chat(`I can make ${name}`)
+  async function tossItem (name, amount) {
+    amount = parseInt(amount, 10)
+    const item = itemByName(name)
+    if (!item) {
+      bot.chat(`I have no ${name}`)
+    } else {
       try {
-        await bot.craft(recipe, amount, craftingTable)
-        bot.chat(`did the recipe for ${name} ${amount} times`)
+        if (amount) {
+          await bot.toss(item.type, null, amount)
+          bot.chat(`tossed ${amount} x ${name}`)
+        } else {
+          await bot.tossStack(item)
+          bot.chat(`tossed ${name}`)
+        }
       } catch (err) {
-        bot.chat(`error making ${name}`)
+        bot.chat(`unable to toss: ${err.message}`)
+      }
+    }
+  }
+
+  async function equipItem (name, destination) {
+    const item = itemByName(name)
+    if (item) {
+      try {
+        await bot.equip(item, destination)
+        bot.chat(`equipped ${name}`)
+      } catch (err) {
+        bot.chat(`cannot equip ${name}: ${err.message}`)
       }
     } else {
-      bot.chat(`I cannot make ${name}`)
+      bot.chat(`I have no ${name}`)
     }
-  } else {
-    bot.chat(`unknown item: ${name}`)
   }
-}
 
-function itemToString (item) {
-  if (item) {
-    return `${item.name} x ${item.count}`
-  } else {
-    return '(nothing)'
+  async function unequipItem (destination) {
+    try {
+      await bot.unequip(destination)
+      bot.chat('unequipped')
+    } catch (err) {
+      bot.chat(`cannot unequip: ${err.message}`)
+    }
   }
-}
 
-function itemByName (name) {
-  const items = bot.inventory.items()
-  if (bot.registry.isNewerOrEqualTo('1.9') && bot.inventory.slots[45]) items.push(bot.inventory.slots[45])
-  return items.filter(item => item.name === name)[0]
-}
+  function useEquippedItem () {
+    bot.chat('activating item')
+    bot.activateItem()
+  }
 
+  async function craftItem (name, amount) {
+    amount = parseInt(amount, 10)
+    const item = bot.registry.itemsByName[name]
+    const craftingTableID = bot.registry.blocksByName.crafting_table.id
 
+    const craftingTable = bot.findBlock({
+      matching: craftingTableID
+    })
 
+    if (item) {
+      const recipe = bot.recipesFor(item.id, null, 1, craftingTable)[0]
+      if (recipe) {
+        bot.chat(`I can make ${name}`)
+        try {
+          await bot.craft(recipe, amount, craftingTable)
+          bot.chat(`did the recipe for ${name} ${amount} times`)
+        } catch (err) {
+          bot.chat(`error making ${name}`)
+        }
+      } else {
+        bot.chat(`I cannot make ${name}`)
+      }
+    } else {
+      bot.chat(`unknown item: ${name}`)
+    }
+  }
 
-const initBot = () => {
+  function itemToString (item) {
+    if (item) {
+      return `${item.name} x ${item.count}`
+    } else {
+      return '(nothing)'
+    }
+  }
+
+  function itemByName (name) {
+    const items = bot.inventory.items()
+    if (bot.registry.isNewerOrEqualTo('1.9') && bot.inventory.slots[45]) items.push(bot.inventory.slots[45])
+    return items.filter(item => item.name === name)[0]
+  }
+
 
   // Setup bot connection
   let bot = mineflayer.createBot(botArgs);
